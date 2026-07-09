@@ -1,8 +1,12 @@
-from typing import Iterable
+from __future__ import annotations
+from typing import Iterable, TYPE_CHECKING
 
 import pygame as pg
 
 from constants import *
+
+if TYPE_CHECKING:
+    from platformer import Game
 
 class Square:
     def __init__(
@@ -91,6 +95,103 @@ class Square:
         new_surf_rect = new_surf.get_rect()
         new_surf_rect.center = (self.x, self.y)
         screen.blit(new_surf, new_surf_rect)
+
+
+class PhysicsEntity:
+    def __init__(self, game: Game, pos: pg.Vector2, size: pg.Vector2, img: pg.Surface):
+        self.game = game
+        self.pos = pos  # CENTER OF RECT
+        self.velocity = pg.Vector2(0, 0)
+        self.size = size
+        self.action = ''
+        self.set_action('idle')
+        self.img = img
+        self.flip = False
+
+    def rect(self) -> pg.Rect:
+        """ Return a rect for the entity. REMINDER: self.pos is center, so the returned rect give the top-left coordinate """
+        return pg.Rect(self.pos.x - self.size.x / 2, self.pos.y - self.size.y / 2, self.size.x, self.size.y)
+
+    def set_action(self, action: str) -> None:
+        """ Change the action state of the entity """
+        if action != self.action:
+            self.action = action
+
+    def update_position(self, dist: float, collide_rects: Iterable[pg.Rect]) -> None:
+        # Update X position, check left-right collisions
+        self.pos.x += dist * self.game.dt * self.velocity.x
+        self.check_collisions_x(collide_rects)
+
+        # Enforce gravity, update Y position, check up-down collisions
+        self.velocity.y = min(5, self.velocity.y + GRAVITY * self.game.dt)
+        self.pos.y += dist * self.game.dt * self.velocity.y
+        self.check_collisions_y(collide_rects)
+
+
+    def check_collision(self, collide_rects: Iterable[pg.Rect]) -> pg.Rect | None:
+        """
+        Check for collisions. Takes an iterable of rects to check against and returns current collision rect or None if no collision.
+        """
+        self_rect = self.rect()
+        for rect in collide_rects:
+            if self_rect.colliderect(rect):
+                return rect
+        return None
+    
+    def check_collisions_x(self, collide_rects: Iterable[pg.Rect]) -> None:
+        """ Check horizontal collisions """
+        rect = self.check_collision(collide_rects)
+        if rect is not None:
+            if self.velocity.x > 0: # Moving to the right
+                self.pos.x = rect.left - self.size.x / 2
+            elif self.velocity.x < 0:  # Moving to the left
+                self.pos.x = rect.right + self.size.x / 2
+            self.velocity.x = 0
+
+    def check_collisions_y(self, collide_rects: Iterable[pg.Rect]) -> None:
+        """ Check vertical collisions """
+        rect = self.check_collision(collide_rects)
+        if rect is not None:
+            if self.velocity.y > 0:
+                self.pos.y = rect.top - self.size.y / 2
+            elif self.velocity.y < 0:
+                self.pos.y = rect.bottom + self.size.y / 2
+            self.velocity.y = 0
+
+    def blit(self, screen: pg.Surface) -> None:
+        """
+        Blit rect with given rotation angle
+        """
+        rect = self.rect()
+        rect.center = (self.pos.x, self.pos.y)
+        screen.blit(self.img, rect)
+
+
+class Player(PhysicsEntity):
+    def __init__(self, game: Game, pos: pg.Vector2, size: pg.Vector2, img: pg.Surface):
+        super().__init__(game, pos, size, img)
+
+        self.jumps: int = 1
+        self.air_time: int = 0
+        self.speed: int = BASE_SPEED
+
+    def jump(self):
+        if self.jumps and self.air_time < 5:
+            self.velocity.y = -5
+            self.jumps -= 1
+            self.air_time = 5
+
+    def update(self, collide_rects: Iterable[pg.Rect]):
+        self.update_position(self.speed, collide_rects)
+
+        self.air_time += 1
+        if self.velocity.y == 0:
+            self.jumps = 1
+            self.air_time = 0
+
+
+    def render(self):
+        self.blit(self.game.screen)
 
 
 class Bullets:
