@@ -3,7 +3,7 @@ from typing import Iterable
 
 import pygame as pg
 
-from constants import *
+from constants import DEBUG, FPS, BACKGROUND, BROWN, SCREEN_WIDTH, SCREEN_HEIGHT, GROUND_HEIGHT, PLAYER_SIZE, PLAYER_START, PLAYER_SPRITES_DIR
 from entities import Bullets, Player, Square
 from utils import load_images
 
@@ -20,7 +20,7 @@ class Game:
     def __init__(self):
         # Initialize pygame and main screen
         pg.init()
-        self.screen = pg.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pg.SCALED)
+        self.screen = pg.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 
         # Add a couple of squares to implement collisions
         self.ground_rect = pg.Rect(0, (SCREEN_HEIGHT - GROUND_HEIGHT), SCREEN_WIDTH, GROUND_HEIGHT)
@@ -121,7 +121,7 @@ class Game:
             self.dt = self.clock.tick(FPS) / 1000
             
             if DEBUG:
-                print(self.player.pos.x, self.player.pos.y)
+                print(self.player.pos)
 
         pg.quit()
 

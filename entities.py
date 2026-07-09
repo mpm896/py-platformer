@@ -102,15 +102,23 @@ class PhysicsEntity:
         self.game = game
         self.pos = pos  # CENTER OF RECT
         self.velocity = pg.Vector2(0, 0)
-        self.size = size
         self.action = ''
         self.set_action('idle')
-        self.img = img
+        
+        # Set image with proper dims
+        visible_area = img.get_bounding_rect()
+        if visible_area.width < size.x or visible_area.height < size.y:
+            self.img = img.subsurface(visible_area)
+            self.size = pg.Vector2(visible_area.width, visible_area.height)
+        else:
+            self.img = img
+            self.size = size
         self.flip = False
 
     def rect(self) -> pg.Rect:
         """ Return a rect for the entity. REMINDER: self.pos is center, so the returned rect give the top-left coordinate """
-        return pg.Rect(self.pos.x - self.size.x / 2, self.pos.y - self.size.y / 2, self.size.x, self.size.y)
+        # INTEGER DIVISION TO AVOID STUTTERING, ESPECIALLY IF RECT SIZE IS ODD
+        return pg.Rect(self.pos.x - self.size.x // 2, self.pos.y - self.size.y // 2, self.size.x, self.size.y)
 
     def set_action(self, action: str) -> None:
         """ Change the action state of the entity """
@@ -158,13 +166,13 @@ class PhysicsEntity:
                 self.pos.y = rect.bottom + self.size.y / 2
             self.velocity.y = 0
 
-    def blit(self, screen: pg.Surface) -> None:
+    def blit(self) -> None:
         """
         Blit rect with given rotation angle
         """
         rect = self.rect()
         rect.center = (self.pos.x, self.pos.y)
-        screen.blit(self.img, rect)
+        self.game.screen.blit(pg.transform.flip(self.img, self.flip, 0), rect)
 
 
 class Player(PhysicsEntity):
@@ -189,9 +197,12 @@ class Player(PhysicsEntity):
             self.jumps = 1
             self.air_time = 0
 
-
     def render(self):
-        self.blit(self.game.screen)
+        if self.velocity.x > 0:
+            self.flip = False
+        elif self.velocity.x < 0:
+            self.flip = True
+        self.blit()
 
 
 class Bullets:
