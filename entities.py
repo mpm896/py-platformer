@@ -104,15 +104,7 @@ class PhysicsEntity:
         self.velocity = pg.Vector2(0, 0)
         self.action = ''
         self.set_action('idle')
-        
-        # Set image with proper dims
-        visible_area = img.get_bounding_rect()
-        if visible_area.width < size.x or visible_area.height < size.y:
-            self.img = img.subsurface(visible_area)
-            self.size = pg.Vector2(visible_area.width, visible_area.height)
-        else:
-            self.img = img
-            self.size = size
+        self.set_img(img, size)
         self.flip = False
 
     def rect(self) -> pg.Rect:
@@ -124,6 +116,19 @@ class PhysicsEntity:
         """ Change the action state of the entity """
         if action != self.action:
             self.action = action
+
+    def set_img(self, img: pg.Surface, size: pg.Vector2=pg.Vector2(0,0)) -> None:
+        """ Change image """
+        self.img = img.subsurface(img.get_bounding_rect())
+        # visible_area = img.get_bounding_rect()
+        # self.img = img.subsurface(visible_area)
+        # if visible_area.width != size.x or visible_area.height != size.y:
+        #     self.img = img.subsurface(visible_area)
+        #     self.size = pg.Vector2(visible_area.width, visible_area.height)
+        # else:
+        #     self.img = img
+        #     self.size = size
+
 
     def update_position(self, dist: float, collide_rects: Iterable[pg.Rect]) -> None:
         # Update X position, check left-right collisions
@@ -170,26 +175,48 @@ class PhysicsEntity:
         """
         Blit rect with given rotation angle
         """
-        rect = self.rect()
+        rect = self.img.get_bounding_rect()
         rect.center = (self.pos.x, self.pos.y)
         self.game.screen.blit(pg.transform.flip(self.img, self.flip, 0), rect)
 
 
 class Player(PhysicsEntity):
-    def __init__(self, game: Game, pos: pg.Vector2, size: pg.Vector2, img: pg.Surface):
-        super().__init__(game, pos, size, img)
+    def __init__(self, game: Game, pos: pg.Vector2, size: pg.Vector2, animation: dict[str, tuple[pg.Surface]]):
 
         self.jumps: int = 1
         self.air_time: int = 0
         self.speed: int = BASE_SPEED
+        self.animation: dict[str, tuple[pg.Surface]] = animation
+        self.animation_idx: int = 0
+        self.animation_speed = 10
+
+        # Get proper size for rect
+        self.rect_sizes = {}
+        for anim in self.animation:
+            height = max([img.get_bounding_rect().height for img in self.animation[anim]])
+            self.rect_sizes[anim] = pg.Vector2(size.x, height)
+    
+        super().__init__(game, pos, size, self.animation['idle'][0])
 
     def jump(self):
         if self.jumps and self.air_time < 5:
+            self.set_action('jump')
             self.velocity.y = -5
             self.jumps -= 1
             self.air_time = 5
 
+    def animate(self) -> None:
+        """ Update the animation frame """
+        self.animation_idx += self.animation_speed * self.game.dt
+        img = self.animation[self.action][int(self.animation_idx) % len(self.animation[self.action])]
+        self.set_img(img)
+
+    def _draw_rect(self) -> None:
+        pg.draw.rect(self.game.screen, "red", self.rect())
+
     def update(self, collide_rects: Iterable[pg.Rect]):
+        self.size = self.rect_sizes[self.action]
+        
         self.update_position(self.speed, collide_rects)
 
         self.air_time += 1
@@ -197,12 +224,18 @@ class Player(PhysicsEntity):
             self.jumps = 1
             self.air_time = 0
 
+            if self.velocity.x == 0 and not self.action == 'look_up' and not self.action == 'crouch':
+                self.set_action('idle')
+            elif self.velocity.x != 0:
+                self.set_action('run')
+
     def render(self):
         if self.velocity.x > 0:
             self.flip = False
         elif self.velocity.x < 0:
             self.flip = True
         self.blit()
+        self.animate()
 
 
 class Bullets:

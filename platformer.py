@@ -36,12 +36,13 @@ class Game:
         # Load player assets
         player_imgs: dict[str, tuple[pg.Surface]] = {}
         for action_dir in PLAYER_SPRITES_DIR.iterdir():
-            imgs: tuple[pg.Surface] = load_images(action_dir)
-            player_imgs[action_dir.name] = imgs
+            if action_dir.is_dir():
+                imgs: tuple[pg.Surface] = load_images(action_dir)
+                player_imgs[action_dir.name] = imgs
 
         # Initialize player squaree
         # self.player = Square(PLAYER_START[0], PLAYER_START[1], PLAYER_SIZE[0], PLAYER_SIZE[1], color="red", gravity=1)
-        self.player = Player(self, pg.Vector2(PLAYER_START), pg.Vector2(PLAYER_SIZE), player_imgs['idle'][0])
+        self.player = Player(self, pg.Vector2(PLAYER_START), pg.Vector2(PLAYER_SIZE), player_imgs)
         self.active_direction_keys = []
 
         # Bullets
@@ -60,8 +61,19 @@ class Game:
                             self.player.jump()
                     
                     # Grab last movement key. Important for velocity of bullet
-                    if event.key in (pg.K_w, pg.K_UP, pg.K_s, pg.K_DOWN, pg.K_a, pg.K_LEFT, pg.K_d, pg.K_RIGHT):
-                        self.active_direction_keys.append(event.key)
+                    # if event.key in (pg.K_w, pg.K_UP, pg.K_s, pg.K_DOWN, pg.K_a, pg.K_LEFT, pg.K_d, pg.K_RIGHT):
+                    #     self.active_direction_keys.append(event.key)
+
+                    if event.key in (pg.K_UP, pg.K_w):
+                        if self.player.velocity.x == 0:
+                            self.player.set_action('look_up')
+
+                    if event.key in (pg.K_DOWN, pg.K_s):
+                        if self.player.velocity.x == 0:
+                            self.player.set_action('crouch')
+
+                # if pg.K_UP in self.active_direction_keys:
+                #         self.player.set_action('look_up')
 
                     # Shoot bullet. Get proper direction and starting position of bullet w.r.t. player
                     # if event.key == pg.K_q:
@@ -81,9 +93,12 @@ class Game:
                     #     self.bullets.add_bullet(
                     #         Square(pos[0], pos[1], BULLET_SIZE[0], BULLET_SIZE[1], color="blue", vel_x=vel_x, vel_y=vel_y)
                     #     )
+
                 if event.type == pg.KEYUP:
-                    if event.key in self.active_direction_keys:
-                        self.active_direction_keys.remove(event.key)
+                    # if event.key in self.active_direction_keys:
+                    #     self.active_direction_keys.remove(event.key)
+                    if event.key in (pg.K_UP, pg.K_w, pg.K_DOWN, pg.K_s):
+                            self.player.set_action('idle')
             
             # Fill screen with background
             self.screen.fill(BACKGROUND)
@@ -91,6 +106,7 @@ class Game:
             # Manage player direction
             keys_pressed = pg.key.get_pressed()
             self.player.velocity.x = (keys_pressed[pg.K_RIGHT] or keys_pressed[pg.K_d]) - (keys_pressed[pg.K_LEFT] or keys_pressed[pg.K_a]) 
+            
 
             # if self.player.vel_x:
             #     self.player.rot = (self.player.rot + ROT_SPEED) % 360
@@ -121,7 +137,7 @@ class Game:
             self.dt = self.clock.tick(FPS) / 1000
             
             if DEBUG:
-                print(self.player.pos)
+                print(self.player.action)
 
         pg.quit()
 
