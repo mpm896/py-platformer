@@ -1,0 +1,110 @@
+{
+    "activeFile": "",
+    "expandedProjectPaths": [
+    ],
+    "file.lastUsedOpenFilter": "All Files (*)",
+    "fileStates": {
+        "/Users/matthewmartinez/Desktop/GameDev/Games/5games/Vampire survivor/data/maps/world.tmx": {
+            "scale": 0.23,
+            "selectedLayer": 3,
+            "viewCenter": {
+                "x": 1823.9130434782608,
+                "y": 1106.521739130435
+            }
+        },
+        "/Users/matthewmartinez/Desktop/GameDev/Games/5games/Vampire survivor/data/tilesets/Objects.tsx": {
+            "dynamicWrapping": true,
+            "scaleInDock": 1,
+            "scaleInEditor": 0.7616
+        },
+        "/Users/matthewmartinez/Desktop/GameDev/Games/5games/Vampire survivor/data/tilesets/world_tileset.tsx": {
+            "scaleInDock": 1
+        },
+        "/Users/matthewmartinez/Downloads/world.tmx": {
+            "scale": 0.29918402777777775,
+            "selectedLayer": 2,
+            "viewCenter": {
+                "x": 1248.3955202228285,
+                "y": 1365.380374862183
+            }
+        },
+        "/Users/matthewmartinez/tilesets/tilemap.tsx": {
+            "scaleInDock": 1
+        },
+        "assets/tmx/platform-map.tmx": {
+            "scale": 1.3123,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 321.95382153470996,
+                "y": 250.32385887373312
+            }
+        },
+        "assets/tmx/platform-map_no_props.tmx": {
+            "scale": 1.1219401041666666,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 166.22990773515932,
+                "y": -15.597980618580607
+            }
+        },
+        "assets/tmx/platform-map_only_ground.tmx": {
+            "expandedObjectLayers": [
+                7
+            ],
+            "scale": 1.3302,
+            "selectedLayer": 0,
+            "viewCenter": {
+                "x": 257.4800781837318,
+                "y": 13.907683055179632
+            }
+        },
+        "assets/tmx/platform-map_temp.tmx": {
+            "expandedObjectLayers": [
+                7
+            ],
+            "scale": 1.3302,
+            "selectedLayer": 1,
+            "viewCenter": {
+                "x": 257.4800781837318,
+                "y": 13.907683055179632
+            }
+        },
+        "assets/tsx/props.tsx": {
+            "dynamicWrapping": true,
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
+        "assets/tsx/tileset.tsx": {
+            "dynamicWrapping": false,
+            "scaleInDock": 1,
+            "scaleInEditor": 2.3094
+        }
+    },
+    "last.exportedFilePath": "/Users/matthewmartinez/Desktop/GameDev/Games/py-platformer/assets/tmx",
+    "last.imagePath": "/Users/matthewmartinez/Desktop/GameDev/Games/py-platformer/assets/Sunny-land-files/Assets/environment/Props",
+    "map.fixedSize": false,
+    "map.lastUsedExportFilter": "JSON map files (*.tmj *.json)",
+    "map.lastUsedFormat": "tmx",
+    "map.tileHeight": 16,
+    "map.tileWidth": 16,
+    "openFiles": [
+    ],
+    "project": "platform.tiled-project",
+    "recentFiles": [
+        "/Users/matthewmartinez/Desktop/GameDev/Games/5games/Vampire survivor/data/tilesets/Objects.tsx",
+        "/Users/matthewmartinez/Desktop/GameDev/Games/5games/Vampire survivor/data/maps/world.tmx",
+        "/Users/matthewmartinez/Downloads/world.tmx",
+        "assets/tmx/platform-map.tmx",
+        "assets/tmx/platform-map_only_ground.tmx",
+        "assets/tmx/platform-map_no_props.tmx",
+        "assets/tsx/props.tsx",
+        "assets/tsx/tileset.tsx"
+    ],
+    "tileset.lastUsedFormat": "tsx",
+    "tileset.spacing": 0,
+    "tileset.tileSize": {
+        "height": 16,
+        "width": 16
+    },
+    "tileset.type": 1
+}

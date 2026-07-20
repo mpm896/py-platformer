@@ -2,8 +2,13 @@ from enum import StrEnum, auto
 from typing import Iterable
 
 import pygame as pg
+from pytmx.util_pygame import load_pygame
 
-from constants import DEBUG, FPS, BACKGROUND, BROWN, SCREEN_WIDTH, SCREEN_HEIGHT, GROUND_HEIGHT, PLAYER_SIZE, PLAYER_START, PLAYER_SPRITES_DIR
+from constants import (DEBUG, FPS, BACKGROUND, BROWN, 
+                       SCREEN_WIDTH, SCREEN_HEIGHT, GROUND_HEIGHT, 
+                       PLAYER_SIZE, PLAYER_START, PLAYER_SPRITES_DIR, 
+                       TILEMAP_DIR, TILE_SIZE, TEST_TILEMAP
+                )
 from entities import Bullets, Player, Square
 from utils import load_images
 
@@ -24,9 +29,10 @@ class Game:
 
         # Add a couple of squares to implement collisions
         self.ground_rect = pg.Rect(0, (SCREEN_HEIGHT - GROUND_HEIGHT), SCREEN_WIDTH, GROUND_HEIGHT)
-        self.platform_rects = [self.ground_rect,
-                    pg.Rect(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 + 100, 200, 100), 
-                    pg.Rect(SCREEN_WIDTH / 2 + 250, SCREEN_HEIGHT / 2 - 50, 75, 150)]
+        # self.platform_rects = [self.ground_rect,
+        #             pg.Rect(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2 + 100, 200, 100), 
+        #             pg.Rect(SCREEN_WIDTH / 2 + 250, SCREEN_HEIGHT / 2 - 50, 75, 150)]
+        self.platform_rects = []
 
         # pygame setup
         self.clock = pg.time.Clock()
@@ -45,8 +51,28 @@ class Game:
         self.player = Player(self, pg.Vector2(PLAYER_START), pg.Vector2(PLAYER_SIZE), player_imgs)
         self.active_direction_keys = []
 
-        # Bullets
-        self.bullets = Bullets()
+        self.setup_map()
+
+    def setup_map(self) -> None:
+        map = load_pygame(TILEMAP_DIR)
+
+        for prop in map.get_layer_by_name('props'):
+            img = map.get_tile_image_by_gid(prop.gid)
+            self.screen.blit(img, (prop.x, prop.y))
+
+        for ts in map.tilesets:
+            print(ts.name, ts.firstgid, ts.tilecount)
+
+        for x, y, img in map.get_layer_by_name('ground').tiles():
+            self.screen.blit(img, (x*TILE_SIZE, y*TILE_SIZE))
+
+
+        # test_map = load_pygame(TEST_TILEMAP)
+        # for obj in test_map.get_layer_by_name('Objects'):
+        #     print(obj)
+
+        
+
 
     def run(self):
         while self.running:
@@ -101,7 +127,7 @@ class Game:
                             self.player.set_action('idle')
             
             # Fill screen with background
-            self.screen.fill(BACKGROUND)
+            # self.screen.fill(BACKGROUND)
             
             # Manage player direction
             keys_pressed = pg.key.get_pressed()
@@ -116,11 +142,11 @@ class Game:
 
 
             # Draw ground
-            pg.draw.rect(self.screen, BROWN, (0, SCREEN_HEIGHT - GROUND_HEIGHT, SCREEN_WIDTH, GROUND_HEIGHT))
+            # pg.draw.rect(self.screen, BROWN, (0, SCREEN_HEIGHT - GROUND_HEIGHT, SCREEN_WIDTH, GROUND_HEIGHT))
 
             # Draw platforms
-            for platform in self.platform_rects[1:]:
-                pg.draw.rect(self.screen, "green", platform)
+            # for platform in self.platform_rects[1:]:
+            #     pg.draw.rect(self.screen, "green", platform)
 
             # Update player
             # self.player.update_position(BASE_SPEED, self.dt, self.platform_rects)

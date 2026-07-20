@@ -1,6 +1,6 @@
 from pathlib import Path
 
-DEBUG = True
+DEBUG = False
 
 FPS = 60
 BACKGROUND = (255,255,255)  # White
@@ -20,10 +20,13 @@ BULLET_SIZE = (7,7)
 BULLET_ROT_SPEED = -8
 BULLET_SPEED = 100
 
-TILE_SIZE = (32,32)
+TILE_SIZE = 16
 IMG_EXT = '.png'
 
 PLAYER_SPRITES_DIR = Path('assets/Sunny-land-files/Assets/Characters/Foxy/Sprites')
+
+TILEMAP_DIR = 'assets/tmx/platform-map.tmx'
+TEST_TILEMAP = '../5games/Vampire_Survivor/data/maps/world.tmx'
 
 
 # LEGACY
