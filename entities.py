@@ -201,7 +201,7 @@ class Player(PhysicsEntity):
     def jump(self):
         if self.jumps and self.air_time < 5:
             self.set_action('jump')
-            self.velocity.y = -5
+            self.velocity.y = -2.5
             self.jumps -= 1
             self.air_time = 5
 
@@ -236,6 +236,22 @@ class Player(PhysicsEntity):
             self.flip = True
         self.blit()
         self.animate()
+
+
+class CollisionRects:
+    def __init__(self, game: Game, rects: list[pg.Rect]):
+        self.game = game
+        self.rects = rects
+
+    def add_rect(self, rect: pg.Rect) -> None:
+        self.rects.append(rect)
+
+    def remove_rect(self, rect: pg.Rect) -> None:
+        if rect in self.rects:
+            self.rects.remove(rect)
+
+    def __iter__(self):
+        return iter(self.rects)
 
 
 class Bullets:

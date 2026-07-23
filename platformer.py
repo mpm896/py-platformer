@@ -9,7 +9,9 @@ from constants import (DEBUG, FPS, BACKGROUND, BROWN,
                        PLAYER_SIZE, PLAYER_START, PLAYER_SPRITES_DIR, 
                        TILEMAP_DIR, TILE_SIZE, TEST_TILEMAP
                 )
-from entities import Bullets, Player, Square
+from entities import Bullets, CollisionRects, Player, Square
+from props import Prop, PropGroup
+from tiles import Tile, GroundTiles
 from utils import load_images
 
 # TO DO:
@@ -39,39 +41,41 @@ class Game:
         self.dt = 0
         self.running = True
 
+        self.active_direction_keys = []
+
+        self.load_assets()
+        self.setup()
+
+    def load_assets(self) -> None:
         # Load player assets
-        player_imgs: dict[str, tuple[pg.Surface]] = {}
+        self.player_imgs: dict[str, tuple[pg.Surface]] = {}
         for action_dir in PLAYER_SPRITES_DIR.iterdir():
             if action_dir.is_dir():
                 imgs: tuple[pg.Surface] = load_images(action_dir)
-                player_imgs[action_dir.name] = imgs
+                self.player_imgs[action_dir.name] = imgs
 
-        # Initialize player squaree
-        # self.player = Square(PLAYER_START[0], PLAYER_START[1], PLAYER_SIZE[0], PLAYER_SIZE[1], color="red", gravity=1)
-        self.player = Player(self, pg.Vector2(PLAYER_START), pg.Vector2(PLAYER_SIZE), player_imgs)
-        self.active_direction_keys = []
-
-        self.setup_map()
-
-    def setup_map(self) -> None:
+    def setup(self) -> None:
         map = load_pygame(TILEMAP_DIR)
 
+        props = []
         for prop in map.get_layer_by_name('props'):
             img = map.get_tile_image_by_gid(prop.gid)
-            self.screen.blit(img, (prop.x, prop.y))
+            pos = pg.Vector2(prop.x, prop.y)
+            props.append(Prop(img, pos))
+        self.props = PropGroup(self, props)
 
-        for ts in map.tilesets:
-            print(ts.name, ts.firstgid, ts.tilecount)
-
+        ground_tiles = []
         for x, y, img in map.get_layer_by_name('ground').tiles():
-            self.screen.blit(img, (x*TILE_SIZE, y*TILE_SIZE))
+            ground_tiles.append(Tile(img, pg.Vector2(x, y)))
+        self.ground_tiles = GroundTiles(self, ground_tiles)
 
+        collision_rects = []
+        for rect in map.get_layer_by_name('collisions'):
+            collision_rects.append(pg.Rect(rect.x, rect.y, rect.width, rect.height))
+        self.ground_rects = CollisionRects(self, collision_rects)
 
-        # test_map = load_pygame(TEST_TILEMAP)
-        # for obj in test_map.get_layer_by_name('Objects'):
-        #     print(obj)
-
-        
+        for loc in map.get_layer_by_name('player_spawn'):
+            self.player = Player(self, pg.Vector2(loc.x, loc.y), pg.Vector2(PLAYER_SIZE), self.player_imgs)
 
 
     def run(self):
@@ -126,8 +130,6 @@ class Game:
                     if event.key in (pg.K_UP, pg.K_w, pg.K_DOWN, pg.K_s):
                             self.player.set_action('idle')
             
-            # Fill screen with background
-            # self.screen.fill(BACKGROUND)
             
             # Manage player direction
             keys_pressed = pg.key.get_pressed()
@@ -141,21 +143,19 @@ class Game:
             #         self.player.rot = (self.player.rot + ROT_SPEED) % 360
 
 
-            # Draw ground
-            # pg.draw.rect(self.screen, BROWN, (0, SCREEN_HEIGHT - GROUND_HEIGHT, SCREEN_WIDTH, GROUND_HEIGHT))
+            # Fill screen with background
+            self.screen.fill(BACKGROUND)
 
-            # Draw platforms
-            # for platform in self.platform_rects[1:]:
-            #     pg.draw.rect(self.screen, "green", platform)
-
-            # Update player
-            # self.player.update_position(BASE_SPEED, self.dt, self.platform_rects)
-            self.player.update(self.platform_rects)
-            self.player.render()
+            self.props.render()
+            self.ground_tiles.render()
 
             # Update bullets
             # self.bullets.update_positions(BULLET_SPEED, self.dt, self.platform_rects)
             # self.bullets.blit(self.screen)
+
+            # Update player
+            self.player.update(self.ground_rects)
+            self.player.render()
             
             # Update the display
             pg.display.flip()
